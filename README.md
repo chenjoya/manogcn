@@ -9,20 +9,20 @@ This is the implementation of our paper: [Capturing Implicit Spatial Cues for Mo
 
 The installation of this repo is very simple, just install PyTorch and several other python libraries.
 
-```
-0. (Optional) We highly recommend that you install in a clean conda environment:
+```python
+# 0. (Optional) We highly recommend that you install in a clean conda environment:
 
 Install Anaconda3 from https://anaconda.org/
 
 conda create -n manogcn python=3.8
 
-1. Install PyTorch:
+# 1. Install PyTorch:
 
 Please follow the official website: https://pytorch.org/
 
-# An example: pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+An example: pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 
-2. Install some required python libraries:
+# 2. Install some required python libraries:
 
 pip install opencv-python tqdm yacs scipy
 ```
@@ -31,7 +31,7 @@ pip install opencv-python tqdm yacs scipy
 
 We support [FreiHAND](https://lmb.informatik.uni-freiburg.de/projects/freihand/) and [HO3D](https://www.tugraz.at/index.php?id=40231) datasets. Please download them and create a softlink like:
 
-```
+```shell
 ln -s ~/data/freihand/ datasets/
 ```
 
@@ -39,7 +39,7 @@ ln -s ~/data/freihand/ datasets/
 
 We provide scripts for easily training and inference. Please check [scripts/train.sh](scripts/train.sh) and [scripts/eval.sh](scripts/eval.sh), such as:
 
-```
+```shell
 config_file="configs/manogcnx3_1x_freihand.yaml"
 gpus=0,1
 gpun=2
