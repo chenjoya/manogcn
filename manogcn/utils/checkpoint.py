@@ -13,14 +13,12 @@ class Checkpointer(object):
         optimizer=None,
         scheduler=None,
         save_dir="",
-        save_to_disk=None,
         logger=None,
     ):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.save_dir = save_dir
-        self.save_to_disk = save_to_disk
         if logger is None:
             logger = logging.getLogger(__name__)
         self.logger = logger
@@ -28,10 +26,7 @@ class Checkpointer(object):
     def save(self, name, **kwargs):
         if not self.save_dir:
             return
-
-        if not self.save_to_disk:
-            return
-
+        
         data = {}
         data["model"] = self.model.state_dict()
         if self.optimizer is not None:

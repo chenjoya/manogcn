@@ -3,8 +3,8 @@ import torch
 class AlignLoss(object):
 
     def orthogonal_procrustes(self, A, B):
-        u, s, v = A.permute(0,2,1).bmm(B).svd()
-        return u.matmul(v.permute(0,2,1)), s.sum(dim=1)
+        u, s, vt = torch.linalg.svd(A.permute(0,2,1).bmm(B))
+        return u.matmul(vt), s.sum(dim=1)
 
     def align(self, A, B):
         R, s = self.orthogonal_procrustes(A, B)

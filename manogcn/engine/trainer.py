@@ -8,7 +8,7 @@ import torch
 import torch.distributed as dist
 
 from manogcn.data import make_data_loader
-from manogcn.utils.comm import get_world_size, synchronize, reduce_dict, is_main_process
+from manogcn.utils.comm import get_world_size, synchronize, reduce_dict, is_main_process, get_rank
 from manogcn.utils.metric_logger import MetricLogger
 from manogcn.engine.inference import inference
 from manogcn.utils.miscellaneous import mkdir
@@ -21,7 +21,6 @@ def do_train(
     optimizer,
     scheduler,
     checkpointer,
-    device,
     checkpoint_period,
     test_period,
     arguments,
@@ -43,7 +42,7 @@ def do_train(
         for _iteration, batches in enumerate(data_loader):
             data_time = time.time() - end
             iteration = _iteration + 1
-            
+
             optimizer.zero_grad()
             loss_dict = model(batches)
             losses = sum(loss for loss in loss_dict.values())
@@ -84,7 +83,7 @@ def do_train(
         scheduler.step()
         arguments["epoch"] = epoch
         
-        if epoch % checkpoint_period == 0:
+        if epoch % checkpoint_period == 0 and get_rank() == 0:
             checkpointer.save(f"model_{epoch}e", **arguments)
         
         if data_loaders_val is not None and test_period > 0 and epoch % test_period == 0:
@@ -105,7 +104,6 @@ def do_train(
                     data_loader_val,
                     save_json_file=save_json_file,
                     visualize_dir="", # do not visualize here
-                    device=cfg.MODEL.DEVICE,
                 )
                 synchronize()
                 model.train()

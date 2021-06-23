@@ -19,10 +19,9 @@ class Model(nn.Module):
         self.gtransformer = build_gtransformer(cfg, self.gtransnet.out_channels)
         
         self.loss = build_loss(cfg)
-        self.device = torch.device(cfg.MODEL.DEVICE)
     
     def forward(self, hand_images):
-        images = torch.stack([hi.image for hi in hand_images]).to(self.device)
+        images = torch.stack([hi.image for hi in hand_images]).cuda()
         mano_features, gtrans_features = self.hrnet(images)
         mano_features = self.manonet(mano_features)
         gtrans_features = self.gtransnet(gtrans_features)

@@ -40,12 +40,12 @@ ln -s ~/data/freihand/ datasets/
 We provide scripts for easily training and inference. Please check [scripts/train.sh](scripts/train.sh) and [scripts/eval.sh](scripts/eval.sh), such as:
 
 ```shell
-config_file="configs/manogcnx3_1x_freihand.yaml"
-gpus=0,1
+config_file="configs/manogcn_1x_freihand.yaml"
+gpus=4,5
 gpun=2
 
 # ------------------------ need not change -----------------------------------
-CUDA_VISIBLE_DEVICES=$gpus python -m torch.distributed.launch --nproc_per_node=$gpun --master_port=$((RANDOM + 10000)) \
+CUDA_VISIBLE_DEVICES=$gpus python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=$gpun \
     train_net.py --config-file $config_file
 ```
 

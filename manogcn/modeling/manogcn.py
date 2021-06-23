@@ -28,11 +28,9 @@ class MANOGCN(nn.Module):
         self.pose_f_fc = nn.Linear(in_features, num_pose*pose_features)
         self.shape_f_fc = nn.Linear(in_features, num_shape*num_vert)
         
-        if cfg.MODEL.MANOGCN.POSEGCN:
-            self.pose_gcn = nn.ModuleList([GraphConv(pose_features+3, pose_features) for _ in range(num_layers)])
-        if cfg.MODEL.MANOGCN.SHAPEGCN:
-            self.shape_gcn = nn.ModuleList([GraphConv(num_shape+3, num_shape) for _ in range(num_layers)])
-
+        self.pose_gcn = nn.ModuleList([GraphConv(pose_features+3, pose_features) for _ in range(num_layers)])
+        self.shape_gcn = nn.ModuleList([GraphConv(num_shape+3, num_shape) for _ in range(num_layers)])
+        
         pose_graph = torch.eye(num_pose, dtype=torch.float, device="cuda")
         for k, v in self.mano.parent.items():
             pose_graph[k][v] = pose_graph[v][k] = 1 
@@ -47,10 +45,8 @@ class MANOGCN(nn.Module):
         self.pose_fc = nn.Linear(in_features=pose_features, out_features=3)
         self.shape_fc = nn.Linear(in_features=num_vert, out_features=1)
         
-        if cfg.MODEL.MANOGCN.POSEGCN:
-            self.pose_gfcs = nn.ModuleList([nn.Linear(in_features=pose_features, out_features=3) for _ in range(num_layers)])
-        if cfg.MODEL.MANOGCN.SHAPEGCN:
-            self.shape_gfcs = nn.ModuleList([nn.Linear(in_features=num_vert, out_features=1) for _ in range(num_layers)])
+        self.pose_gfcs = nn.ModuleList([nn.Linear(in_features=pose_features, out_features=3) for _ in range(num_layers)])
+        self.shape_gfcs = nn.ModuleList([nn.Linear(in_features=num_vert, out_features=1) for _ in range(num_layers)])
 
         self.num_pose = num_pose
         self.num_shape = num_shape
@@ -80,24 +76,16 @@ class MANOGCN(nn.Module):
         shape_fs = self.shape_f_fc(x).relu().view(batch, 10, -1) 
         
         verts, joints16 = self.manor(pose_fs, shape_fs, self.pose_fc, self.shape_fc)
-          
+        
         for i in range(self.num_layers):
             # feature aggregation 
-            if hasattr(self, "posegcn"):
-                pose_gfs = torch.cat([pose_fs, joints16], dim=2)
-                pose_gfs = self.pose_gcn[i](pose_gfs, self.pose_graph)
-                pose_gfc = self.pose_gfcs[i]
-            else:
-                pose_gfs = pose_fs
-                pose_gfc = self.pose_fc
-
-            if hasattr(self, "shapegcn"):
-                shape_gfs = torch.cat([shape_fs.permute(0,2,1), verts], dim=2)    
-                shape_gfs = self.shape_gcn[i](shape_gfs, self.mesh_graph).permute(0,2,1)
-                shape_gfc = self.shape_gfcs[i]
-            else:
-                shape_gfs = shape_fs
-                shape_gfc = self.shape_fc 
+            pose_gfs = torch.cat([pose_fs, joints16], dim=2)
+            pose_gfs = self.pose_gcn[i](pose_gfs, self.pose_graph)
+            pose_gfc = self.pose_gfcs[i]
+            
+            shape_gfs = torch.cat([shape_fs.permute(0,2,1), verts], dim=2)    
+            shape_gfs = self.shape_gcn[i](shape_gfs, self.mesh_graph).permute(0,2,1)
+            shape_gfc = self.shape_gfcs[i]
             verts, joints16 = self.manor(pose_gfs, shape_gfs, pose_gfc, shape_gfc)
         
         return verts
