@@ -1,0 +1,1 @@
+from .hand_image import HandImage

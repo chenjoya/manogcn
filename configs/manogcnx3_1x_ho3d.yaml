@@ -1,0 +1,22 @@
+MODEL:
+  WEIGHT: ""
+  HRNET:
+    PRETRAINED: "pose_hrnet_w32_384x288.pth" 
+  MANONET:
+    ARCHITECTURE: "resnet50"
+  GTRANSNET:
+    ARCHITECTURE: "resnet18"
+  MANOGCN:
+    NUM_LAYERS: 3
+DATASETS:
+  TRAIN: ("ho3d_train",)
+  TEST: ("ho3d_test",)
+SOLVER:
+  BATCH_SIZE: 64
+  LR: 0.1
+  MILESTONES: (6, 7)
+  EPOCHS: 8
+  TEST_PERIOD: 2
+  CHECKPOINT_PERIOD: 2
+TEST:
+  BATCH_SIZE: 64

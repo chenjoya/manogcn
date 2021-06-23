@@ -1,0 +1,6 @@
+/outputs
+/datasets
+__pycache__/
+*.pth
+*.out
+
