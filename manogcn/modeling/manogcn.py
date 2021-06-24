@@ -45,8 +45,8 @@ class MANOGCN(nn.Module):
         self.pose_fc = nn.Linear(in_features=pose_features, out_features=3)
         self.shape_fc = nn.Linear(in_features=num_vert, out_features=1)
         
-        self.pose_gfcs = nn.ModuleList([nn.Linear(in_features=pose_features, out_features=3) for _ in range(num_layers)])
-        self.shape_gfcs = nn.ModuleList([nn.Linear(in_features=num_vert, out_features=1) for _ in range(num_layers)])
+        self.pose_gfc = nn.Linear(in_features=pose_features, out_features=3)
+        self.shape_gfc = nn.Linear(in_features=num_vert, out_features=1)
 
         self.num_pose = num_pose
         self.num_shape = num_shape
@@ -81,12 +81,10 @@ class MANOGCN(nn.Module):
             # feature aggregation 
             pose_gfs = torch.cat([pose_fs, joints16], dim=2)
             pose_gfs = self.pose_gcn[i](pose_gfs, self.pose_graph)
-            pose_gfc = self.pose_gfcs[i]
             
             shape_gfs = torch.cat([shape_fs.permute(0,2,1), verts], dim=2)    
             shape_gfs = self.shape_gcn[i](shape_gfs, self.mesh_graph).permute(0,2,1)
-            shape_gfc = self.shape_gfcs[i]
-            verts, joints16 = self.manor(pose_gfs, shape_gfs, pose_gfc, shape_gfc)
+            verts, joints16 = self.manor(pose_gfs, shape_gfs, self.pose_gfc, self.shape_gfc)
         
         return verts
 
